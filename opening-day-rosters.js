@@ -4,9 +4,10 @@ const cheerio = require('cheerio');
 
 
 class Team {
-  constructor(acr) {
+  constructor(acr,id) {
     this.baseURL = 'https://www.basketball-reference.com/teams/'+acr+'/2019.html';
     this.teamAcronym = acr;
+    this.teamID = id;
   }
 
   printURL() {
@@ -19,6 +20,8 @@ class Team {
       request.get(teamURL, function(error, response, body) {
         if (!error && response.statusCode == 200) {
             let $ = cheerio.load(body);
+            let gamePages = $('li.result');
+
             let firstGamePage = 'https://www.basketball-reference.com/' + $('li.result').eq(0).find('span > a').attr('href');
             resolve(firstGamePage);
         } else {console.log("Request failed!")}
@@ -26,11 +29,12 @@ class Team {
     })
   }
 
-  getPlayerRoster(firstGameURL, teamRosters, callback) {
+  getPlayerRoster(gameURL, teamRosters, callback) {
     let teamAcronym = this.teamAcronym;
+    let teamID = this.teamID;
     return new Promise(function(resolve, reject) {
       let playerList = [];
-      request.get(firstGameURL, function(error, response, body) {
+      request.get(gameURL, function(error, response, body) {
         if (!error && response.statusCode == 200) {
           let $ = cheerio.load(body);
           let rosterTable = $('div#all_box_'+teamAcronym.toLowerCase()+'_basic').find('table > tbody > tr')
@@ -71,6 +75,7 @@ class Team {
 
           teamRosters.push({
             team: teamAcronym
+            ,team_id: teamID
             ,roster: playerList
           })
           fs.writeFileSync('data/openingDayRosters.json',JSON.stringify(teamRosters));
@@ -81,19 +86,33 @@ class Team {
   }
 }
 
+function scrapePromise(url) {
+  return new Promise(function(resolve, reject) {
+    request.get(url, function(error, response, body) {
+      if (error) {
+        reject(error);
+      } else if {(!error && response.statusCode == 200) {
+          resolve(body);
+      } else {console.log("Request failed!")}
+    });
+  });
+}
+
+
 function loadTeams() {
-  // let teams = ['HOU']
-  let teams = [ 'HOU','TOR','GSW','UTA','PHI','OKC','BOS','SAS','POR','MIN','DEN','NOP','IND','CLE','WAS','MIA','LAC','CHO','DET','MIL','LAL','DAL','NYK','BRK','ORL','ATL','MEM','CHI','SAC','PHO']
+  let teams = ['HOU']
+  // let teams = [ 'HOU','TOR','GSW','UTA','PHI','OKC','BOS','SAS','POR','MIN','DEN','NOP','IND','CLE','WAS','MIA','LAC','CHO','DET','MIL','LAL','DAL','NYK','BRK','ORL','ATL','MEM','CHI','SAC','PHO']
   let teamRosters = [];
   for (let t=0;t<teams.length;t++) {
-    let team = new Team(teams[t]);
+    let team = new Team(teams[t],t);
 
     let firstGamePage = team.getFirstGamePage();
-    firstGamePage.then(function(result) {
-      team.getPlayerRoster(result,teamRosters);
-    }, function(err) {
-      console.log(err);
-    })
+    console.log(firstGamePage);
+    // firstGamePage.then(function(result) {
+    //   team.getPlayerRoster(result,teamRosters);
+    // }, function(err) {
+    //   console.log(err);
+    // })
   }
 }
 

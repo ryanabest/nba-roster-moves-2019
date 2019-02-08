@@ -1,0 +1,24 @@
+{
+  "name": "nba-roster-moves-2019",
+  "version": "1.0.0",
+  "description": "",
+  "main": "get-team-names.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ryanabest/nba-roster-moves-2019.git"
+  },
+  "author": "Ryan Best",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ryanabest/nba-roster-moves-2019/issues"
+  },
+  "homepage": "https://github.com/ryanabest/nba-roster-moves-2019#readme",
+  "dependencies": {
+    "async": "^2.6.1",
+    "cheerio": "^1.0.0-rc.2",
+    "request": "^2.88.0"
+  }
+}
